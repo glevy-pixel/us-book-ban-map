@@ -2,26 +2,404 @@
 <html>
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Book Ban Map</title>
 
   <link
     href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css"
     rel="stylesheet"
   />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap"
+    rel="stylesheet"
+  />
 
   <style>
-    html, body {
+    *, *::before, *::after {
       margin: 0;
       padding: 0;
-      height: 100%;
+      box-sizing: border-box;
     }
+
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: #0a0a0a;
+    }
+
     #map {
       width: 100%;
       height: 100%;
     }
+
+    /* ── LEGEND ── */
+    #legend {
+      position: absolute;
+      bottom: 36px;
+      left: 20px;
+      background: rgba(10, 10, 10, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 20px 22px;
+      color: #e8e0d8;
+      z-index: 10;
+      min-width: 200px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      transition: opacity 0.3s ease;
+    }
+
+    #legend h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 15px;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      margin-bottom: 14px;
+      color: #fff;
+    }
+
+    .legend-subtitle {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .legend-bar {
+      width: 100%;
+      height: 14px;
+      border-radius: 3px;
+      background: linear-gradient(to right, #fff5f0, #fcbba1, #fc9272, #fb6a4a, #de2d26, #a50f15);
+      margin-bottom: 6px;
+    }
+
+    .legend-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: rgba(255,255,255,0.55);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .legend-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 14px 0;
+    }
+
+    .legend-note {
+      font-size: 10.5px;
+      color: rgba(255,255,255,0.35);
+      line-height: 1.5;
+    }
+
+    /* ── TITLE OVERLAY ── */
+    #title-overlay {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    #title-overlay h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      font-weight: 400;
+      color: #fff;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+      letter-spacing: -0.01em;
+    }
+
+    #title-overlay p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.55);
+      margin-top: 4px;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+      font-weight: 500;
+    }
+
+    /* ── BACK BUTTON ── */
+    #back-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: #e8e0d8;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 18px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    #back-btn:hover {
+      background: rgba(30, 30, 30, 0.9);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    #back-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ── COUNTY INFO PANEL ── */
+    #county-panel {
+      position: absolute;
+      bottom: 36px;
+      right: 20px;
+      background: rgba(10, 10, 10, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 22px 24px;
+      color: #e8e0d8;
+      z-index: 10;
+      min-width: 260px;
+      max-width: 320px;
+      display: none;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      transition: opacity 0.3s ease;
+    }
+
+    #county-panel.visible {
+      display: block;
+      animation: panelIn 0.3s ease;
+    }
+
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #county-panel h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px;
+      font-weight: 400;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    #county-panel .county-state {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.4);
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .county-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .county-stat:last-child {
+      border-bottom: none;
+    }
+
+    .county-stat-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      font-weight: 500;
+    }
+
+    .county-stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fb6a4a;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .county-stat-value.small {
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .county-note {
+      margin-top: 12px;
+      font-size: 10.5px;
+      color: rgba(255,255,255,0.3);
+      line-height: 1.5;
+    }
+
+    /* ── STATE INFO PANEL (shown on state click) ── */
+    #state-panel {
+      position: absolute;
+      top: 80px;
+      right: 20px;
+      background: rgba(10, 10, 10, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 22px 24px;
+      color: #e8e0d8;
+      z-index: 10;
+      min-width: 240px;
+      display: none;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    #state-panel.visible {
+      display: block;
+      animation: panelIn 0.3s ease;
+    }
+
+    #state-panel h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      font-weight: 400;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    #state-panel .state-total {
+      font-size: 36px;
+      font-weight: 700;
+      color: #de2d26;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+
+    #state-panel .state-total-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.4);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .state-rank {
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 6px;
+    }
+
+    /* ── MAPLIBRE POPUP OVERRIDE ── */
+    .maplibregl-popup-content {
+      background: rgba(10, 10, 10, 0.9) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #e8e0d8 !important;
+      border-radius: 10px !important;
+      padding: 10px 14px !important;
+      font-family: 'DM Sans', sans-serif !important;
+      font-size: 13px !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+    }
+
+    .maplibregl-popup-tip {
+      border-top-color: rgba(10, 10, 10, 0.9) !important;
+    }
+
+    .popup-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: #fff;
+    }
+
+    .popup-value {
+      font-size: 12px;
+      color: rgba(255,255,255,0.55);
+      margin-top: 2px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      #legend { bottom: 16px; left: 12px; padding: 14px 16px; min-width: 170px; }
+      #county-panel { bottom: 16px; right: 12px; min-width: 220px; padding: 16px 18px; }
+      #state-panel { top: 70px; right: 12px; padding: 16px 18px; }
+      #title-overlay h1 { font-size: 20px; }
+      #back-btn { top: 16px; right: 12px; padding: 8px 14px; font-size: 12px; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- TITLE -->
+  <div id="title-overlay">
+    <h1>U.S. Book Bans</h1>
+    <p>Click a state to explore county-level estimates</p>
+  </div>
+
+  <!-- BACK BUTTON -->
+  <button id="back-btn" onclick="resetView()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+    All states
+  </button>
+
+  <!-- LEGEND -->
+  <div id="legend">
+    <h3>Book Bans by State</h3>
+    <div class="legend-subtitle">Number of bans (log scale)</div>
+    <div class="legend-bar"></div>
+    <div class="legend-labels">
+      <span>0</span>
+      <span>10</span>
+      <span>100</span>
+      <span>1,000</span>
+      <span>9,000+</span>
+    </div>
+    <div class="legend-divider"></div>
+    <div class="legend-note">
+      Source: PEN America Index of School Book Bans.<br>
+      County estimates are area-weighted approximations.
+    </div>
+  </div>
+
+  <!-- STATE INFO PANEL -->
+  <div id="state-panel">
+    <h3 id="state-panel-name"></h3>
+    <div class="state-total-label">Total book bans</div>
+    <div class="state-total" id="state-panel-total"></div>
+    <div class="state-rank" id="state-panel-rank"></div>
+  </div>
+
+  <!-- COUNTY INFO PANEL -->
+  <div id="county-panel">
+    <h3 id="county-panel-name"></h3>
+    <div class="county-state" id="county-panel-state"></div>
+    <div class="county-stat">
+      <span class="county-stat-label">Estimated bans</span>
+      <span class="county-stat-value" id="county-panel-bans"></span>
+    </div>
+    <div class="county-stat">
+      <span class="county-stat-label">State total</span>
+      <span class="county-stat-value small" id="county-panel-state-total"></span>
+    </div>
+    <div class="county-stat">
+      <span class="county-stat-label">Share of state</span>
+      <span class="county-stat-value small" id="county-panel-pct"></span>
+    </div>
+    <div class="county-note">
+      County figures are estimated from state totals,
+      weighted by county area. Actual distribution may vary.
+    </div>
+  </div>
 
   <div id="map"></div>
 
