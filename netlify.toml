@@ -1,0 +1,21 @@
+# netlify.toml  —  place at your repository root
+#
+# Existing config? Just merge the [functions], [[redirects]], and
+# NODE_VERSION lines into your current file — don't remove your build
+# settings.
+
+[build.environment]
+  # Node 18+ ships global fetch, which the function relies on.
+  NODE_VERSION = "20"
+
+[functions]
+  # Netlify auto-detects netlify/functions, but this is explicit.
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Serve the function at the clean path /api/ask (matches AI_ENDPOINT).
+# status = 200 makes this a rewrite, so it stays same-origin — no CORS.
+[[redirects]]
+  from = "/api/ask"
+  to = "/.netlify/functions/ask"
+  status = 200
