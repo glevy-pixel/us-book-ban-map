@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — The Book Ban Map Initiative</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --ink: #e8e0d8;
+      --white: #ffffff;
+      --muted: rgba(255,255,255,0.5);
+      --faint: rgba(255,255,255,0.32);
+      --line: rgba(255,255,255,0.09);
+      --accent: #fb6a4a;
+      --accent-deep: #de2d26;
+      --panel: rgba(255,255,255,0.035);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* subtle red glow at the top, echoing the map's heat scale */
+    body::before {
+      content: "";
+      position: fixed;
+      top: -40vh; left: 50%;
+      transform: translateX(-50%);
+      width: 120vw; height: 80vh;
+      background: radial-gradient(ellipse at center,
+        rgba(222,45,38,0.14), rgba(222,45,38,0) 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 26px 120px;
+    }
+
+    /* ── top nav ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 26px 0 0;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    nav .brand {
+      font-family: 'DM Serif Display', serif;
+      font-size: 16px;
+      color: var(--white);
+      letter-spacing: 0.01em;
+    }
+    nav a.map-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 16px;
+      transition: border-color 0.18s ease, background 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    nav a.map-link:hover {
+      border-color: rgba(251,106,74,0.6);
+      background: rgba(251,106,74,0.08);
+    }
+
+    /* ── hero ── */
+    header.hero {
+      padding: 88px 0 56px;
+      border-bottom: 1px solid var(--line);
+    }
+    .kicker {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-weight: 400;
+      font-size: clamp(34px, 6vw, 54px);
+      line-height: 1.08;
+      color: var(--white);
+      letter-spacing: -0.015em;
+      margin-bottom: 20px;
+    }
+    .lede {
+      font-size: 18px;
+      color: rgba(232,224,216,0.82);
+      max-width: 60ch;
+    }
+
+    /* ── sections ── */
+    section { padding: 52px 0; border-bottom: 1px solid var(--line); }
+    section:last-of-type { border-bottom: none; }
+
+    h2 {
+      font-family: 'DM Serif Display', serif;
+      font-weight: 400;
+      font-size: clamp(23px, 3.4vw, 30px);
+      color: var(--white);
+      letter-spacing: -0.01em;
+      margin-bottom: 20px;
+    }
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+      margin: 26px 0 8px;
+      letter-spacing: 0.01em;
+    }
+    p { margin-bottom: 16px; color: rgba(232,224,216,0.86); }
+    p:last-child { margin-bottom: 0; }
+    strong { color: var(--white); font-weight: 600; }
+    a.inline { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(251,106,74,0.35); }
+    a.inline:hover { border-bottom-color: var(--accent); }
+
+    .note {
+      font-size: 14px;
+      color: var(--muted);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-left: 2px solid var(--accent);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-top: 22px;
+    }
+
+    /* ── stat row ── */
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 8px;
+    }
+    .stat {
+      flex: 1 1 150px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+    .stat .num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 34px;
+      color: var(--accent);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat .lbl {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* ── resource cards ── */
+    .resources { display: grid; gap: 12px; margin-top: 8px; }
+    .resource {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px 20px;
+      transition: border-color 0.18s ease, transform 0.18s ease;
+    }
+    .resource:hover { border-color: rgba(251,106,74,0.5); transform: translateY(-2px); }
+    .resource .r-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 17px;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+    .resource .r-desc { font-size: 13.5px; color: var(--muted); }
+    .resource .r-go { font-size: 12px; color: var(--accent); font-weight: 600; margin-top: 8px; }
+
+    /* ── creator ── */
+    .creator-role {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--faint);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    footer.page-foot {
+      padding-top: 46px;
+      font-size: 13px;
+      color: var(--faint);
+      line-height: 1.6;
+    }
+    footer.page-foot a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line); }
+    footer.page-foot a:hover { color: var(--ink); }
+
+    @media (max-width: 640px) {
+      header.hero { padding: 60px 0 44px; }
+      section { padding: 40px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <span class="brand">Book Ban Map</span>
+    <a class="map-link" href="index.html">
+      View the map
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </a>
+  </nav>
+
+  <div class="wrap">
+
+    <header class="hero">
+      <div class="kicker">The BBM Initiative</div>
+      <h1>Making book bans visible.</h1>
+      <p class="lede">
+        The Book Ban Map is a free, non-partisan tool that turns national
+        data on school book bans into something you can see, explore, and
+        understand &mdash; state by state, county by county.
+      </p>
+    </header>
+
+    <section id="mission">
+      <h2>What this is</h2>
+      <p>
+        Book bans are easy to read about and hard to picture. A number in a
+        report doesn&rsquo;t tell you where removals are concentrated, how
+        one state compares to another, or how close the issue is to home.
+        The Book Ban Map exists to close that gap: it takes the
+        <a class="inline" href="https://pen.org" target="_blank" rel="noopener">PEN America</a>
+        Index of School Book Bans and renders it as an interactive map,
+        paired with an AI assistant that can answer plain-language questions
+        about what the data shows.
+      </p>
+      <p>
+        The goal is civic understanding, not persuasion. BBM doesn&rsquo;t
+        tell you what to think about book bans &mdash; it shows you what is
+        being recorded, cites where the numbers come from, and lets you draw
+        your own conclusions.
+      </p>
+    </section>
+
+    <section id="book-bans">
+      <h2>Understanding book bans</h2>
+      <p>
+        A <strong>book ban</strong>, as tracked here, is an instance in which
+        a book is removed or restricted from student access in a school or
+        school library following a challenge &mdash; a formal objection to its
+        content. Challenges come from a range of directions and are debated on
+        real and competing grounds.
+      </p>
+      <p>
+        Supporters of removals often frame them around parental rights and
+        keeping certain material age-appropriate. Opponents often frame them
+        as censorship that narrows students&rsquo; access to diverse ideas and
+        perspectives. Both arguments are part of an ongoing national
+        conversation, and reasonable people land in different places. BBM&rsquo;s
+        job is to make the underlying <em>facts</em> of that conversation
+        legible, not to settle it.
+      </p>
+    </section>
+
+    <section id="data">
+      <h2>The data, honestly</h2>
+      <p>
+        State-level figures come from the
+        <a class="inline" href="https://pen.org" target="_blank" rel="noopener">PEN America</a>
+        Index of School Book Bans, a widely-cited national dataset. Additional
+        population and geographic reference data is drawn from
+        <a class="inline" href="https://worldpopulationreview.com" target="_blank" rel="noopener">World Population Review</a>.
+        BBM credits these sources directly and does not alter their numbers.
+      </p>
+      <div class="note">
+        <strong>A note on the county view.</strong> The county-level numbers
+        on the map are <em>estimates</em>, not exact counts. They are produced
+        by distributing each state&rsquo;s recorded total across its counties,
+        weighted by land area. Real bans are not distributed evenly by area, so
+        these figures are meant to illustrate scale and relative concentration
+        &mdash; not to report precise county totals. That limitation is stated
+        openly because a tool about the free flow of information should be
+        transparent about its own.
+      </p>
+    </section>
+
+    <section id="impact">
+      <h2>How it&rsquo;s used</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="num" style="font-size:28px;">Thousands</div>
+          <div class="lbl">of people have visited and explored the map</div>
+        </div>
+        <div class="stat">
+          <div class="num" style="font-size:28px;">Several</div>
+          <div class="lbl">schools across New York City have used it as a tool</div>
+        </div>
+      </div>
+      <p style="margin-top:26px;">
+        The Book Ban Map began as a schoolwide passion-project deliverable and
+        has since reached several thousand visitors. It has been used as a
+        teaching and reference tool in several schools across New York City
+        &mdash; a way for students to engage with a live civic issue using real
+        data rather than headlines alone.
+      </p>
+    </section>
+
+    <section id="support">
+      <h2>Support the cause</h2>
+      <p>
+        BBM is an educational tool and does not collect donations itself.
+        The most direct way to support the work of tracking book bans and
+        defending the freedom to read is to give to the organizations already
+        doing it &mdash; including the one whose data makes this map possible.
+      </p>
+      <div class="resources">
+        <a class="resource" href="https://pen.org" target="_blank" rel="noopener">
+          <div class="r-name">PEN America</div>
+          <div class="r-desc">Tracks school book bans nationally and defends free expression. The source of this map&rsquo;s data.</div>
+          <div class="r-go">Visit &rarr;</div>
+        </a>
+        <a class="resource" href="https://www.ftrf.org" target="_blank" rel="noopener">
+          <div class="r-name">Freedom to Read Foundation</div>
+          <div class="r-desc">The American Library Association&rsquo;s legal and educational arm protecting the right to read.</div>
+          <div class="r-go">Visit &rarr;</div>
+        </a>
+        <a class="resource" href="https://www.everylibrary.org" target="_blank" rel="noopener">
+          <div class="r-name">EveryLibrary</div>
+          <div class="r-desc">A national political action committee working to protect libraries and fight book bans.</div>
+          <div class="r-go">Visit &rarr;</div>
+        </a>
+        <a class="resource" href="https://www.aclu.org" target="_blank" rel="noopener">
+          <div class="r-name">ACLU</div>
+          <div class="r-desc">Litigates and advocates on First Amendment and free-speech issues, including in schools.</div>
+          <div class="r-go">Visit &rarr;</div>
+        </a>
+      </div>
+    </section>
+
+    <section id="creator">
+      <h2>About the creator</h2>
+      <div class="creator-role">Founder</div>
+      <p>
+        The Book Ban Map was built by <strong>Georges Levy</strong>, a New York
+        City high school student and competitive debater with a focus on civic
+        education and public service. The project grew out of a simple
+        conviction from years in debate: that access to ideas &mdash; and the
+        freedom to encounter, question, and argue with them &mdash; is
+        foundational to how young people learn to think. BBM is an attempt to
+        make one part of that conversation visible to anyone who wants to
+        understand it.
+      </p>
+      <p>
+        You can connect on
+        <a class="inline" href="https://www.linkedin.com/in/georgeslevy" target="_blank" rel="noopener">LinkedIn</a>.
+      </p>
+    </section>
+
+    <footer class="page-foot">
+      Data sources: PEN America Index of School Book Bans and World Population
+      Review. County figures are area-weighted estimates. The Book Ban Map is
+      an independent, non-partisan educational project and is not affiliated
+      with PEN America or any listed organization. &middot; <a href="index.html">Back to the map</a>
+    </footer>
+
+  </div>
+</body>
+</html>
