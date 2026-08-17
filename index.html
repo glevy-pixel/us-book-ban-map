@@ -820,54 +820,65 @@
     <div id="titles-header">
       <div>
         <h2>Most Banned Titles</h2>
-        <div class="titles-sub">2024&ndash;2025 &middot; PEN America</div>
+        <div class="titles-sub">Since 2021 &middot; PEN America</div>
       </div>
       <button class="titles-close" onclick="closeTitles()" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
     <div id="titles-intro">
-      In the 2024&ndash;2025 school year, PEN America recorded bans affecting
-      3,752 unique titles across 87 public school districts. These were removed
-      by the most districts nationwide.
+      Since 2021, PEN America has documented 22,810 book bans across 45 states
+      and 451 public school districts. These 20 titles have been banned most
+      often over that period.
     </div>
     <div id="titles-list"></div>
     <div id="titles-foot">
-      Ranked by the number of U.S. public school districts that banned each
-      title. Source: PEN America Index of School Book Bans, 2024&ndash;2025.
-      <a href="https://pen.org/book-bans/" target="_blank" rel="noopener">See the full index &rarr;</a>
+      Ranked by total recorded bans, 2021&ndash;2025. Source: PEN America,
+      Top 52 Most Banned Books Since 2021.
+      <a href="https://pen.org/top-52-banned-books-since-2021/" target="_blank" rel="noopener">See the full list &rarr;</a>
     </div>
   </div>
 
   <script>
-    // Verified from PEN America's 2024-2025 Index (districts each title was banned in)
+    // Verified from PEN America's "Top 52 Banned Books Since 2021" (total bans, 2021-2025)
     const bannedTitles = [
-      { title: "A Clockwork Orange", author: "Anthony Burgess", districts: 23 },
-      { title: "Breathless", author: "Jennifer Niven", districts: 20 },
-      { title: "Sold", author: "Patricia McCormick", districts: 20 },
-      { title: "Last Night at the Telegraph Club", author: "Malinda Lo", districts: 19 },
-      { title: "A Court of Mist and Fury", author: "Sarah J. Maas", districts: 18 },
-      { title: "Crank", author: "Ellen Hopkins", districts: 17 },
-      { title: "Forever", author: "Judy Blume", districts: 17 },
-      { title: "The Perks of Being a Wallflower", author: "Stephen Chbosky", districts: 17 },
-      { title: "Wicked", author: "Gregory Maguire", districts: 17 }
+      { rank: 1,  title: "Looking for Alaska", author: "John Green", bans: 147 },
+      { rank: 2,  title: "Nineteen Minutes", author: "Jodi Picoult", bans: 142 },
+      { rank: 3,  title: "Sold", author: "Patricia McCormick", bans: 136 },
+      { rank: 4,  title: "The Perks of Being a Wallflower", author: "Stephen Chbosky", bans: 135 },
+      { rank: 5,  title: "Crank", author: "Ellen Hopkins", bans: 128 },
+      { rank: 6,  title: "Thirteen Reasons Why", author: "Jay Asher", bans: 126 },
+      { rank: 7,  title: "Tricks", author: "Ellen Hopkins", bans: 120 },
+      { rank: 8,  title: "The Bluest Eye", author: "Toni Morrison", bans: 116 },
+      { rank: 9,  title: "The Kite Runner", author: "Khaled Hosseini", bans: 115 },
+      { rank: 10, title: "A Court of Mist and Fury", author: "Sarah J. Maas", bans: 112 },
+      { rank: 11, title: "Identical", author: "Ellen Hopkins", bans: 110 },
+      { rank: 12, title: "The Handmaid's Tale", author: "Margaret Atwood", bans: 106 },
+      { rank: 13, title: "Water for Elephants", author: "Sara Gruen", bans: 101 },
+      { rank: 14, title: "All Boys Aren't Blue", author: "George M. Johnson", bans: 100 },
+      { rank: 15, title: "The Absolutely True Diary of a Part-Time Indian", author: "Sherman Alexie", bans: 99 },
+      { rank: 15, title: "Empire of Storms", author: "Sarah J. Maas", bans: 99 },
+      { rank: 15, title: "A Court of Thorns and Roses", author: "Sarah J. Maas", bans: 99 },
+      { rank: 18, title: "Out of Darkness", author: "Ashley Hope Pérez", bans: 98 },
+      { rank: 19, title: "Gender Queer: A Memoir", author: "Maia Kobabe", bans: 94 },
+      { rank: 20, title: "A Court of Wings and Ruin", author: "Sarah J. Maas", bans: 92 }
     ];
-    const TITLES_MAX = 23;
+    const TITLES_MAX = 147;
     let titlesRendered = false;
 
     function renderTitles() {
       const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      document.getElementById("titles-list").innerHTML = bannedTitles.map((b, i) => {
-        const pct = Math.round((b.districts / TITLES_MAX) * 100);
+      document.getElementById("titles-list").innerHTML = bannedTitles.map((b) => {
+        const pct = Math.round((b.bans / TITLES_MAX) * 100);
         return '<div class="title-row">' +
-          '<div class="title-rank">' + (i + 1) + '</div>' +
+          '<div class="title-rank">' + b.rank + '</div>' +
           '<div class="title-main">' +
             '<div class="title-name">' + esc(b.title) + '</div>' +
             '<div class="title-author">' + esc(b.author) + '</div>' +
             '<div class="title-bar"><span style="width:' + pct + '%"></span></div>' +
           '</div>' +
-          '<div class="title-count"><div class="n">' + b.districts + '</div>' +
-          '<div class="u">districts</div></div>' +
+          '<div class="title-count"><div class="n">' + b.bans + '</div>' +
+          '<div class="u">bans</div></div>' +
         '</div>';
       }).join("");
       titlesRendered = true;
