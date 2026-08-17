@@ -1137,11 +1137,12 @@ return maplibregl$1;
     document.getElementById("county-panel-pct").textContent = pct + "%";
 
     // Label + note reflect exactly how this county's number was derived.
-    document.getElementById("county-bans-label").textContent = (complete || partial) ? "Recorded bans";
+    document.getElementById("county-bans-label").textContent = (complete || partial) ? "Recorded bans" : "Estimated bans";
     document.getElementById("county-note").textContent = complete
       ? "Aggregated from PEN America's district-level records (since 2021). Each district is counted in the county it belongs to."
       : partial
       ? "Aggregated from PEN America's district-level records (since 2021). A few city or independent districts in this state aren't yet located to a county, so some counties may be undercounted."
+      : "Estimated from the state total, weighted by county area. This state's district records aren't yet mapped to counties.";
 
     document.getElementById("county-panel").classList.add("visible");
   }
