@@ -962,11 +962,14 @@ return maplibregl$1;
 
   // REAL county-level counts, aggregated from PEN district-level records for
   // states whose school districts map cleanly to counties. Keyed by county FIPS.
-  const countyBans = {"12001":24, "12005":37, "12009":201, "12011":28, "12015":89, "12019":866, "12021":376, "12031":259, "12033":1787, "12035":34, "12041":10, "12047":19, "12053":84, "12055":23, "12057":1, "12061":212, "12063":14, "12069":65, "12071":297, "12073":13, "12081":110, "12083":62, "12085":144, "12086":8, "12087":3, "12089":36, "12091":96, "12095":734, "12097":31, "12099":27, "12101":1, "12103":31, "12105":64, "12109":143, "12111":24, "12113":136, "12115":13, "12117":205, "12125":47, "12127":109, "12129":1, "12131":58, "21021":100, "21037":3, "28089":22, "37021":4, "37023":38, "37035":10, "37051":9, "37087":1, "37125":10, "37129":1, "37141":41, "37147":5, "37193":7, "45013":99, "45051":29, "45063":1, "45077":3, "45083":50, "51015":4, "51059":2, "51065":16, "51085":95, "51087":2, "51107":3, "51113":20, "51127":1, "51141":1, "51177":58, "51770":1, "56021":31, "56025":16, "56029":10};
+  const countyBans = {"08123":2, "12001":24, "12005":37, "12009":201, "12011":28, "12015":89, "12019":866, "12021":376, "12031":259, "12033":1787, "12035":34, "12041":10, "12047":19, "12053":84, "12055":23, "12057":1, "12061":212, "12063":14, "12069":65, "12071":297, "12073":13, "12081":110, "12083":62, "12085":144, "12086":8, "12087":3, "12089":36, "12091":96, "12095":734, "12097":31, "12099":27, "12101":1, "12103":31, "12105":64, "12109":143, "12111":24, "12113":136, "12115":13, "12117":205, "12125":47, "12127":109, "12129":1, "12131":58, "13057":10, "13067":54, "13117":17, "13121":4, "19171":49, "19177":14, "21021":100, "21037":3, "24021":4, "24031":1, "24045":1, "28089":22, "37021":4, "37023":38, "37035":10, "37051":9, "37087":1, "37125":10, "37129":1, "37141":41, "37147":5, "37193":7, "42071":1, "45013":99, "45051":29, "45063":1, "45077":3, "45083":50, "47009":2, "47065":14, "47083":2, "47107":1, "47147":1, "47149":32, "47165":1, "47187":1, "47189":13, "48027":11, "48029":610, "48037":58, "48061":5, "48073":1, "48085":462, "48113":2, "48119":1, "48139":1, "48157":25, "48167":7, "48171":42, "48201":140, "48221":133, "48329":4, "48339":185, "48423":2, "48439":241, "48453":22, "48473":1, "48491":11, "49053":70, "51015":4, "51059":2, "51085":95, "51087":2, "51107":3, "51113":20, "51127":1, "51177":58, "51770":1, "54107":2, "56021":31, "56025":16, "56029":10};
 
-  // States where county numbers are REAL (aggregated from district records),
-  // not area-weighted estimates.
-  const recordedStates = new Set(["Florida", "Kentucky", "Mississippi", "North Carolina", "South Carolina", "Virginia", "Wyoming"]);
+  // States where EVERY district maps to a county, so county counts are exact.
+  const completeStates = new Set(["Florida", "Kentucky", "Mississippi", "Texas", "Wyoming"]);
+  // States where county-named districts are placed for real, but a few city or
+  // independent districts aren't yet located to a county (so some counties may
+  // be undercounted). Still recorded, not estimated.
+  const partialStates = new Set(["Georgia", "North Carolina", "South Carolina", "Virginia"]);
 
   // Pre-compute sorted rankings
   const stateRankings = Object.entries(stateBanData)
@@ -1124,7 +1127,8 @@ return maplibregl$1;
   function showCountyPanel(countyName, stateName, bans) {
     const stateTotal = stateBanData[stateName] || 0;
     const pct = stateTotal > 0 ? ((bans / stateTotal) * 100).toFixed(1) : "0";
-    const recorded = recordedStates.has(stateName);
+    const complete = completeStates.has(stateName);
+    const partial = partialStates.has(stateName);
 
     document.getElementById("county-panel-name").textContent = countyName;
     document.getElementById("county-panel-state").textContent = stateName;
@@ -1132,11 +1136,13 @@ return maplibregl$1;
     document.getElementById("county-panel-state-total").textContent = formatNumber(stateTotal);
     document.getElementById("county-panel-pct").textContent = pct + "%";
 
-    // Label + note change depending on whether these are real or estimated
-    document.getElementById("county-bans-label").textContent = recorded ? "Recorded bans" : "Estimated bans";
-    document.getElementById("county-note").textContent = recorded
-      ? "Aggregated from PEN America's district-level records (since 2021). Districts in this state map cleanly to counties."
-      : "Estimated from the state total, weighted by county area. District-level records for this state are not yet mapped to counties.";
+    // Label + note reflect exactly how this county's number was derived.
+    document.getElementById("county-bans-label").textContent = (complete || partial) ? "Recorded bans" : "Estimated bans";
+    document.getElementById("county-note").textContent = complete
+      ? "Aggregated from PEN America's district-level records (since 2021). Each district is counted in the county it belongs to."
+      : partial
+      ? "Aggregated from PEN America's district-level records (since 2021). A few city or independent districts in this state aren't yet located to a county, so some counties may be undercounted."
+      : "Estimated from the state total, weighted by county area. This state's district records aren't yet mapped to counties.";
 
     document.getElementById("county-panel").classList.add("visible");
   }
@@ -1358,7 +1364,7 @@ return maplibregl$1;
       // Assign county numbers. For "recorded" states we use REAL aggregated
       // counts from PEN district records; otherwise we fall back to an
       // area-weighted estimate of the state total.
-      const isRecorded = recordedStates.has(stateName);
+      const isRecorded = completeStates.has(stateName) || partialStates.has(stateName);
       const stateCounties = countiesGeo.features.filter(cf => cf.id.startsWith(fips));
       const totalArea = stateCounties.reduce((s, cf) => s + (cf.properties._area || 0), 0);
 
